@@ -1,0 +1,48 @@
+\documentclass{article}
+
+\begin{document}
+<<>>=
+require(thesisR)
+data(healthoptmind)
+rand <- dat[,grep("RAND", x=names(dat))]
+rand.series <- fit_factor_series(rand, factors=1:12)
+comm.t <- communality(fs=rand.series)
+comm.df <- as.data.frame(comm.t)
+comm.df[,"Questions"] <- rownames(comm.df)
+comm.names <- paste("comm_fac", 1:12, sep="")
+comm.names[13] <- "Questions"
+names(comm.df) <- comm.names
+comm.melt <- reshape2::melt(comm.df, id.vars=c("Questions"))
+print(ggplot2::ggplot(comm.melt, ggplot2::aes(x=variable, y=value, group=Questions, colour=Questions))+ggplot2::geom_line()+ggplot2::theme(axis.text.x=ggplot2::element_text(angle=-90))+ggplot2::xlab("n_factors")+ggplot2::ylab("communalities"))
+@ 
+
+See the plot. Its a nice plot, right? I like the way that it seems different items get fully involved in the solution at different points. Maybe group the plots by subscale or factor solutions? Keep the spaghetti plot part, but colour the lines based on the scales/factors. 
+
+
+<<boxplot, echo=FALSE, fig=TRUE>>=
+print(ggplot2::ggplot(comm.melt, ggplot2::aes(x=variable, y=value))+ggplot2::geom_boxplot()+ggplot2::xlab("n_factors")+ggplot2::ylab("Communalities")+ggplot2::theme(axis.text.x=ggplot2::element_text(angle=-90)))
+@ 
+
+The boxplot is also interesting. Note the sharp jump at 2, and the small drop after 5. Not a solution I spent much time with, but it has some support in the literature. 
+
+<<crossval, echo=FALSE, results=hide>>=
+data(healthoptmind)
+maas <- dat[,with(dat, grep("MAASQ", x=names(dat)))]
+maas_split <- split_sample(maas, 4)
+maas_comb <- create_combinations(maas_split)
+## maas_mfa <- lapply(maas_comb, function (x)
+##                    psych::fa(x[["train"]], nfactors=1, rotate="oblimin", method="ml"))
+## mfa_comm <- communality(maas_mfa)
+## names(mfa_comm) <- c("A", "B", "C", "D")
+## mfa.df <- sapply(mfa_comm, unlist)
+## mfa.m <- reshape2::melt(mfa.df, id.vars=rownames(mfa.df))
+## mfa.m[,"Var1"] <- with(mfa.m, gsub("communality.MAAS", "",  x=Var1))
+## ggplot(mfa.m, aes(x=Var1, y=value))+geom_boxplot()
+@ 
+
+The code above shows a typical analytics workflow with the package. Firstly, the sample
+is split (using split\_sample) and then we create train and test sets (using create\_combinations). 
+Next, we apply a factor model to all of the training data, and extract a useful parameter (in this case, communality) and can see how it varies over the different splits.
+
+
+\end{document}
