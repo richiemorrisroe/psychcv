@@ -4,7 +4,7 @@
 ##' @title factor_xtab
 ##' @param x an object of class "psych" "fa"
 ##' @param names names to be given to the output. Should be a vector of strings
-##' @param ... further arguments passed to the FactorCoeff method
+##' @param ... further arguments passed to the factor_coef method
 ##' @return xtable object of coefficients
 ##' @author Richard Morrisroe
 factor_xtab <-  function (x, names=NULL, ...) {
@@ -47,6 +47,7 @@ factor_coeff <- function (x, names=NULL) {
 ##' @return an xtable object containing the between-factor correlations
 ##' @author Richard Morrisroe
 factor_cor <- function (x, ...) {
+    ##TODO: refactor into generics and separate display from logic
   res <- x$score.cor
   #allnames <- attr(x$loadings, "dimnames")
   factnames <- colnames(x$loadings)
@@ -69,7 +70,7 @@ extract_loadings <- function (x, loadings=0.3) {
     xitemsload <- apply(xucmat, 2,
                         function (y)
                         names(y[which(abs(y) >=
-                                      loadings)])) 
+                                      loadings)]))
   xitemsload
 }
 ##' {Takes a psych fa object, and extracts the communalities and uniquenesses}
